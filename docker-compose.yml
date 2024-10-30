@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16
+    user: root
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres
+    restart: always             # run as a service
+    volumes:
+        - ./postgresql:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  odoo17:
+    build: .
+    image: odoo:17
+    user: root
+    depends_on:
+      - db
+    ports:
+      - "10017:8069"
+      - "20017:8072" # live chat
+    tty: true
+    command: ["/opt/odoo-venv/bin/python", "/usr/bin/odoo"]
+    environment:
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=odoo
+      - PGPASSWORD=root
+      - PGDATABASE=postgres
+    volumes:
+      #- /etc/timezone:/etc/timezone:ro
+      #- /etc/localtime:/etc/localtime:ro
+      # - ./entrypoint.sh:/entrypoint.sh
+      - ./requirements.txt:/requirements.txt
+      - ./addons:/mnt/extra-addons
+      - ./SistemaParquimetros-Odoo/parking_meters:/mnt/extra-addons/parking_meters
+      - ./NotificacionesMpz-Odoo/notifications_mpz:/mnt/extra-addons/notifications_mpz
+      - ./etc:/etc/odoo
+    restart: always             # run as a service
+
+
+ 
